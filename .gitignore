@@ -1,0 +1,17 @@
+# .NET / C#
+bin/
+obj/
+.vs/
+*.user
+*.db
+*.db-shm
+*.db-wal
+
+# Node / React
+node_modules/
+dist/
+.env
+
+# OS
+.DS_Store
+Thumbs.db
