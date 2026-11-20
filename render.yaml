@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: franchise-fullstack-test-api
+    runtime: docker
+    region: ohio
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_HTTP_PORTS
+        value: "10000"
+      - key: ConnectionStrings__DefaultConnection
+        value: Data Source=/data/franchises.db
+      - key: Authentication__Issuer
+        value: Franchise.Api
+      - key: Authentication__Audience
+        value: Franchise.Frontend
+      - key: Authentication__SigningKey
+        generateValue: true
+      - key: Authentication__AdminUsername
+        generateValue: true
+      - key: Authentication__AdminPassword
+        generateValue: true
+      - key: Cors__AllowedOrigins__0
+        value: https://franchise-fullstack-test-frontend.onrender.com
+    disk:
+      name: franchise-data
+      mountPath: /data
+      sizeGB: 1
+
+  - type: web
+    name: franchise-fullstack-test-frontend
+    runtime: static
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://franchise-fullstack-test-api.onrender.com/api

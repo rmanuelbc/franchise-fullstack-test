@@ -1,5 +1,6 @@
 using Franchise.Api.Data;
 using Franchise.Api.DTOs;
+using Franchise.Api.Validation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,10 +28,28 @@ public class FranchisesController : ControllerBase
         return Ok(franchises);
     }
 
+    // GET: api/franchises/{franchiseId}
+    [HttpGet("{franchiseId}")]
+    public async Task<ActionResult<FranchiseResponseDto>> GetById(int franchiseId)
+    {
+        var franchise = await _context.Franchises
+            .Where(f => f.Id == franchiseId)
+            .Select(f => new FranchiseResponseDto(f.Id, f.Name))
+            .FirstOrDefaultAsync();
+
+        if (franchise == null)
+            return NotFound(new { message = $"Franchise with ID {franchiseId} was not found." });
+
+        return Ok(franchise);
+    }
+
     // POST: api/franchises
     [HttpPost]
     public async Task<ActionResult<FranchiseResponseDto>> Create([FromBody] CreateFranchiseDto dto)
     {
+        if (!NameValidation.IsValid(dto.Name))
+            return BadRequest(new { message = "Franchise name must contain at least 2 non-whitespace characters." });
+
         var franchise = new Models.Franchise
         {
             Name = dto.Name.Trim()
@@ -40,7 +59,7 @@ public class FranchisesController : ControllerBase
         await _context.SaveChangesAsync();
 
         var response = new FranchiseResponseDto(franchise.Id, franchise.Name);
-        return CreatedAtAction(nameof(GetAll), new { id = franchise.Id }, response);
+        return CreatedAtAction(nameof(GetById), new { franchiseId = franchise.Id }, response);
     }
 
     // PATCH: api/franchises/{franchiseId}
@@ -51,10 +70,27 @@ public class FranchisesController : ControllerBase
         if (franchise == null)
             return NotFound(new { message = $"Franchise with ID {franchiseId} was not found." });
 
+        if (!NameValidation.IsValid(dto.Name))
+            return BadRequest(new { message = "Franchise name must contain at least 2 non-whitespace characters." });
+
         franchise.Name = dto.Name.Trim();
         await _context.SaveChangesAsync();
 
         return Ok(new FranchiseResponseDto(franchise.Id, franchise.Name));
+    }
+
+    // DELETE: api/franchises/{franchiseId}
+    [HttpDelete("{franchiseId}")]
+    public async Task<IActionResult> Delete(int franchiseId)
+    {
+        var franchise = await _context.Franchises.FindAsync(franchiseId);
+        if (franchise == null)
+            return NotFound(new { message = $"Franchise with ID {franchiseId} was not found." });
+
+        _context.Franchises.Remove(franchise);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
     }
 
     // GET: api/franchises/{franchiseId}/top-stock-products
