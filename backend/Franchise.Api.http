@@ -1,0 +1,142 @@
+@Franchise.Api_HostAddress = http://localhost:5206
+@token = {{login.response.body.accessToken}}
+@franchiseId = 1
+@branchId = 1
+@productId = 1
+
+### Sign in
+# Replace the credentials with values configured in .NET User Secrets.
+# @name login
+POST {{Franchise.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "replace-with-your-local-password"
+}
+
+### List franchises
+GET {{Franchise.Api_HostAddress}}/api/franchises
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Create a franchise
+POST {{Franchise.Api_HostAddress}}/api/franchises
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Coffee Network"
+}
+
+### Get a franchise
+GET {{Franchise.Api_HostAddress}}/api/franchises/{{franchiseId}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Rename a franchise
+PATCH {{Franchise.Api_HostAddress}}/api/franchises/{{franchiseId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Coffee Network Updated"
+}
+
+### Get the product with the highest stock in each branch
+GET {{Franchise.Api_HostAddress}}/api/franchises/{{franchiseId}}/top-stock-products
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### List a franchise's branches
+GET {{Franchise.Api_HostAddress}}/api/franchises/{{franchiseId}}/branches
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Create a branch
+POST {{Franchise.Api_HostAddress}}/api/franchises/{{franchiseId}}/branches
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Central Branch"
+}
+
+### Get a branch
+GET {{Franchise.Api_HostAddress}}/api/branches/{{branchId}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Rename a branch
+PATCH {{Franchise.Api_HostAddress}}/api/branches/{{branchId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Central Branch Updated"
+}
+
+### List a branch's products
+GET {{Franchise.Api_HostAddress}}/api/branches/{{branchId}}/products
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Create a product
+POST {{Franchise.Api_HostAddress}}/api/branches/{{branchId}}/products
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "House Blend",
+  "stock": 25
+}
+
+### Get a product
+GET {{Franchise.Api_HostAddress}}/api/products/{{productId}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Update product stock
+PATCH {{Franchise.Api_HostAddress}}/api/products/{{productId}}/stock
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "stock": 30
+}
+
+### Rename a product
+PATCH {{Franchise.Api_HostAddress}}/api/products/{{productId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "House Blend Updated"
+}
+
+### Delete a product from a branch
+DELETE {{Franchise.Api_HostAddress}}/api/branches/{{branchId}}/products/{{productId}}
+Authorization: Bearer {{token}}
+
+### Validation example: a negative stock value should return 400
+POST {{Franchise.Api_HostAddress}}/api/branches/{{branchId}}/products
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Invalid Product",
+  "stock": -1
+}
+
+### Not-found example
+GET {{Franchise.Api_HostAddress}}/api/franchises/999999
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Permanently delete a branch and its products
+DELETE {{Franchise.Api_HostAddress}}/api/branches/{{branchId}}
+Authorization: Bearer {{token}}
+
+### Permanently delete a franchise and its branches/products
+DELETE {{Franchise.Api_HostAddress}}/api/franchises/{{franchiseId}}
+Authorization: Bearer {{token}}
